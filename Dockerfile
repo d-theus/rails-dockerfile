@@ -1,36 +1,26 @@
-FROM centos:centos7
+FROM ruby:2.2-alpine
+MAINTAINER Andrew Dorofeyev (http://github.com/d-theus)
 
-ARG rails_version=4.1.7
-ARG ruby_version=2.2.0
-ARG user=web
 
-MAINTAINER d-theus(http://github.com/d-theus)
-RUN cat /etc/yum/pluginconf.d/fastestmirror.conf  | sed 's/enabled=1/enabled=0/g' > /etc/yum/pluginconf.d/fastestmirror.conf
-RUN yum -y update
-RUN yum -y install epel-release
-RUN yum -y install git-core zlib zlib-devel gcc-c++ patch readline readline-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison curl sqlite-devel postgresql-server postgresql-contrib postgresql-devel ImageMagick; yum clean all
+ENV BUILD_PACKAGES="curl-dev ruby-dev build-base" \
+    DEV_PACKAGES="zlib-dev libxml2-dev libxslt-dev tzdata yaml-dev sqlite-dev postgresql-dev mysql-dev" \
+    RAILS_VERSION="4.2"
 
-RUN useradd $user
-USER $user
-ENV HOME /home/$user
-RUN mkdir -p $HOME/app
-WORKDIR $HOME/app
+RUN apk --update --upgrade add $BUILD_PACKAGES $DEV_PACKAGES
 
-RUN git clone git://github.com/sstephenson/rbenv.git $HOME/.rbenv
-ENV RBENV_ROOT $HOME/.rbenv
-ENV PATH $RBENV_ROOT/bin:$PATH
-RUN eval "$(rbenv init -)"
-RUN mkdir -p $RBENV_ROOT/plugins
-RUN git clone https://github.com/rbenv/rbenv-vars.git $RBENV_ROOT/plugins/rbenv-vars; git clone git://github.com/sstephenson/ruby-build.git $RBENV_ROOT/plugins/ruby-build
-ENV PATH $RBENV_ROOT/plugins/ruby-build/bin:$PATH
-ENV RUBY_CONFIGURE_OPTS=--disable-install-doc
+RUN gem install bundler -N && \
+    gem install -N nokogiri -- --use-system-libraries && \
+    gem install rails -N -v $RAILS_VERSION
 
-RUN rbenv install -v $ruby_version
-RUN rbenv global $ruby_version
-
-RUN rbenv exec gem install rails -v $rails_version --no-ri --no-rdoc
-
+RUN echo 'gem: --no-document' >> ~/.gemrc && \
+    cp ~/.gemrc /etc/gemrc && \
+    chmod uog+r /etc/gemrc && \
+    bundle config --global build.nokogiri  "--use-system-libraries" && \
+    bundle config --global build.nokogumbo "--use-system-libraries" && \
+    find / -type f -iname \*.apk-new -delete && \
+    rm -rf /var/cache/apk/* && \
+    rm -rf /usr/lib/lib/ruby/gems/*/cache/* && \
+    rm -rf ~/.gem
 
 EXPOSE 3000
-
 
