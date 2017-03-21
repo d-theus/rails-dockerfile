@@ -1,8 +1,8 @@
-FROM ruby:2.2-alpine
+FROM dtheus/ruby:2.2-alpine
 MAINTAINER Andrew Dorofeyev (http://github.com/d-theus)
 
 
-ENV BUILD_PACKAGES="curl-dev ruby-dev build-base" \
+ENV BUILD_PACKAGES="ruby-dev build-base" \
     DEV_PACKAGES="zlib-dev libxml2-dev libxslt-dev tzdata yaml-dev sqlite-dev postgresql-dev mysql-dev" \
     RAILS_VERSION="4.2"
 
