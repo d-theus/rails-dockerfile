@@ -1,7 +1,3 @@
-# rails-dockerfile
+Image to build rails applications from.
 
-Dockerizing rails.
-Production-ready base image. Base OS and packages:
-- CentOS 7
-- postgresql-devel
-- imagemagick
+Based on `ruby:2.2-alpine`
